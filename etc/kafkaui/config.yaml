@@ -3,9 +3,11 @@ auth:
 kafka:
   clusters:
   - bootstrapServers: kafka:29092
+    ksqldbServer: http://ksqldb:8088
     name: kafka
     properties: {}
     readOnly: false
+    schemaRegistry: http://schema-registry:8081
 rbac:
   roles: []
 webclient: {}

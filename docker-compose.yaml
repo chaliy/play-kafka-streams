@@ -38,6 +38,69 @@ services:
     volumes:
       - ./etc/kafkaui/config.yaml:/etc/kafkaui/dynamic_config.yaml
 
+  schema-registry:
+    image: confluentinc/cp-schema-registry:latest
+    depends_on:
+      - zookeeper
+      - kafka
+    ports:
+      - '8081:8081'
+      - '31002:31002'
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
+
+  # ksql-server:
+  #   image: confluentinc/cp-ksql-server:5.4.10
+  #   depends_on:
+  #     - kafka
+  #     - schema-registry
+  #   ports:
+  #     - '31003:31003'
+  #     - '8088:8088'
+  #   environment:
+  #     KSQL_BOOTSTRAP_SERVERS: kafka:29092
+  #     KSQL_LISTENERS: http://0.0.0.0:8088
+  #     # KSQL_KSQL_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+  #     KSQL_KSQL_SERVICE_ID: asgard
+  #     KSQL_LOG4J_ROOT_LOGLEVEL: "INFO"
+  #     KSQL_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
+  #     # --- Processing log config ---
+  #     KSQL_LOG4J_PROCESSING_LOG_BROKERLIST: kafka:29092
+  #     KSQL_LOG4J_PROCESSING_LOG_TOPIC: asgard_processing_log
+  #     KSQL_KSQL_LOGGING_PROCESSING_TOPIC_NAME: asgard_processing_log
+  #     KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
+  #     KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
+
+  # ksql-cli:
+  #   image: confluentinc/cp-ksql-cli:5.4.10
+  #   depends_on:
+  #     - ksql-server
+  #   entrypoint: /bin/sh
+  #   tty: true
+
+  ksqldb:
+    image: confluentinc/ksqldb-server:0.29.0
+    depends_on:
+      - kafka
+      - schema-registry
+    ports:
+      - '8088:8088'
+    environment:
+      KSQL_BOOTSTRAP_SERVERS: kafka:29092
+      KSQL_LISTENERS: http://0.0.0.0:8088
+      # KSQL_KSQL_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
+      KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
+
+  ksql-cli:
+    image: confluentinc/ksqldb-cli:0.29.0
+    platform: linux/amd64
+    depends_on:
+      - ksqldb
+    # entrypoint: /bin/sh
+    tty: true
+
 
   # kafka-connect:
   #   image: confluentinc/cp-kafka-connect:6.2.0
