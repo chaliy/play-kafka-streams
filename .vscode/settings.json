@@ -1,0 +1,6 @@
+{
+    "java.import.maven.enabled": false,
+    "java.project.sourcePaths": [
+        "~/.m2/repository/"
+    ]
+}
